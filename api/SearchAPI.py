@@ -15,7 +15,7 @@ def searchListings(thing):
     query = request.args.get('query') # /search?query=
 
     try:
-        listingDB.test.find({item: {$regex: 'thing'}})
+        listings = listingDB.find({'item': {'$regex': 'thing'}})
         if listings is None:
             return json.dumps({'error': "Searched item not found: "})
         else:
