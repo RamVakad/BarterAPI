@@ -56,7 +56,7 @@ def addListing():
     listing = {'username': username, 'item': item, 'description': description, 'timeAdded': timeNow, 'picture': Binary(picture)}
 
     try:
-        record = listingDB.find_one({'username': username, 'item': item})
+        record = listingDB.find_one({'item': item, 'description': description})
         if record:
             return json.dumps({'error': "You are trying to add a duplicate listing.", 'code': 6})
         else:
