@@ -3,6 +3,8 @@ from services.DBConn import db
 import api.AuthorizationAPI
 import json
 from bson import Binary
+from bson.json_util import dumps
+import time
 
 list_api = Blueprint('list_api', __name__)
 userDB = db.users
@@ -13,11 +15,11 @@ listingDB = db.listings
 @api.AuthorizationAPI.requires_auth
 def allListing():
     try:
-        listings = listingDB.find({})
+        listings = dumps(listingDB.find())
         if listings is None:
             return json.dumps({'error': "No listings found.", 'code': 1})
         else:
-            return json.dumps(listings)
+            return listings
     except Exception as e:
         print(e)
         return json.dumps({'error': "Server error grabbing all listings.", 'code': 2})
@@ -29,11 +31,11 @@ def userListing():
     username = request.userNameFromToken
 
     try:
-        listings = listingDB.find({'username': username})
+        listings = dumps(listingDB.find({'username': username}))
         if listings is None:
             return json.dumps({'error': "No listings found for current user: " + username, 'code': 3})
         else:
-            return json.dumps(listings)
+            return listings
     except Exception as e:
         print(e)
         return json.dumps({'error': "Server error grabbing all listings under current user.", 'code': 4})
@@ -45,12 +47,13 @@ def addListing():
     username = request.userNameFromToken
     item = request.args.get('item')
     description = request.args.get('description')
+    timeNow = int(round(time.time() * 1000))
     picture = request.files['picture'].read()
 
     if len(picture) > (1000000 * 5):
         return json.dumps({'error': "File too large.", 'code': 5})
 
-    listing = {'username': username, 'item': item, 'description': description, 'picture': Binary(picture)}
+    listing = {'username': username, 'item': item, 'description': description, 'timeAdded': timeNow, 'picture': Binary(picture)}
 
     try:
         record = listingDB.find_one({'username': username, 'item': item})
