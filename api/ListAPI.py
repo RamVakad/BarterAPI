@@ -72,7 +72,7 @@ def addListing():
         return json.dumps({'error': "Server error while checking if listing exists.", 'code': 7})
 
 
-@list_api.route("/remove/<object_id>", methods=['POST'])
+@list_api.route("/remove/<object_id>")
 @api.AuthorizationAPI.requires_auth
 def removeListing(object_id):
 
@@ -81,7 +81,7 @@ def removeListing(object_id):
         if record is None:
             return json.dumps({'error': "The listing you want to delete does not exist.", 'code': 8})
         else:
-            # delete listing with username and item match
+            # delete listing with specific object id
             listingDB.delete_one({'_id': ObjectId(object_id)})
             return json.dumps({'success': True})
     except Exception as e:
