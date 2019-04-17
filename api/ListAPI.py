@@ -4,7 +4,9 @@ import api.AuthorizationAPI
 import json
 from bson import Binary
 from bson.json_util import dumps
+from bson.objectid import ObjectId
 import time
+import datetime
 
 list_api = Blueprint('list_api', __name__)
 userDB = db.users
@@ -46,14 +48,17 @@ def userListing():
 def addListing():
     username = request.userNameFromToken
     item = request.args.get('item')
+    category = request.args.get('category')
+    condition = request.args.get('condition')
     description = request.args.get('description')
     timeNow = int(round(time.time() * 1000))
+    dateAdded = datetime.datetime.now()
     picture = request.files['picture'].read()
 
     if len(picture) > (1000000 * 5):
         return json.dumps({'error': "File too large.", 'code': 5})
 
-    listing = {'username': username, 'item': item, 'description': description, 'timeAdded': timeNow, 'picture': Binary(picture)}
+    listing = {'username': username, 'item': item, 'category': category, 'condition': condition, 'description': description, 'timeAdded': timeNow, 'dateAdded': dateAdded, 'picture': Binary(picture)}
 
     try:
         record = listingDB.find_one({'item': item, 'description': description})
@@ -67,24 +72,40 @@ def addListing():
         return json.dumps({'error': "Server error while checking if listing exists.", 'code': 7})
 
 
-@list_api.route("/remove/<item>", methods=['POST'])
+@list_api.route("/remove/<object_id>", methods=['POST'])
 @api.AuthorizationAPI.requires_auth
-def removeListing(item):
-    username = request.userNameFromToken
+def removeListing(object_id):
 
     try:
-        record = listingDB.find_one({'username': username, 'item': item})
+        record = listingDB.find_one({'_id': ObjectId(object_id)})
         if record is None:
             return json.dumps({'error': "The listing you want to delete does not exist.", 'code': 8})
         else:
             # delete listing with username and item match
-            listingDB.delete_one({'username': username, 'item': item})
+            listingDB.delete_one({'_id': ObjectId(object_id)})
             return json.dumps({'success': True})
     except Exception as e:
         print(e)
         return json.dumps({'error': "Server error while checking if listing exists.", 'code': 9})
 
 
+@list_api.route("/update/<object_id>", methods=['POST'])
+@api.AuthorizationAPI.requires_auth
+def updateListing(object_id):
+    item = request.args.get('item')
+    condition = request.args.get('condition')
+    description = request.args.get('description')
 
+    try:
+        record = listingDB.find_one({'_id': ObjectId(object_id)})
+        if record is None:
+            return json.dumps({'error': "The listing you want to update does not exist.", 'code': 10})
+        else:
+            # update description
+            listingDB.updateOne({'item': item, 'condition': condition, 'description': description})
+            return json.dumps({'success': True})
+    except Exception as e:
+        print(e)
+        return json.dumps({'error': "Server error while checking if listing exists.", 'code': 11})
 
 
