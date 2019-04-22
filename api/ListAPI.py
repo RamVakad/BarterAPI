@@ -92,7 +92,6 @@ def removeListing(object_id):
 @list_api.route("/update/<object_id>", methods=['POST'])
 @api.AuthorizationAPI.requires_auth
 def updateListing(object_id):
-    item = request.args.get('item')
     condition = request.args.get('condition')
     description = request.args.get('description')
 
@@ -101,8 +100,17 @@ def updateListing(object_id):
         if record is None:
             return json.dumps({'error': "The listing you want to update does not exist.", 'code': 10})
         else:
-            # update description
-            listingDB.updateOne({'item': item, 'condition': condition, 'description': description})
+            # update condition, and description
+            listingDB.updateOne(
+                {'_id': ObjectId(object_id)},
+                {
+                    "$set": {
+                        "condition": condition,
+                        "description": description
+                    }
+                }
+            )
+
             return json.dumps({'success': True})
     except Exception as e:
         print(e)

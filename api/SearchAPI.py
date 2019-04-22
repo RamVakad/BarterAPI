@@ -10,16 +10,16 @@ listingDB = db.listings
 
 @search_api.route("", methods=['GET'])
 @api.AuthorizationAPI.requires_auth
-def searchListings(thing):
+def searchListings():
     username = request.userNameFromToken
-    query = request.args.get('query') # /search?query=
+    query = request.args.get('query')  # /search?query=
 
     try:
-        listings = listingDB.find({'item': {'$regex': 'thing'}})
+        listings = listingDB.find({'item': {'$regex': 'query'}})
         if listings is None:
             return json.dumps({'error': "Searched item not found: "})
         else:
             return json.dumps(listings)
     except Exception as e:
         print(e)
-        return json.dumps({'error': "Server error grabbing all listings under current user.", 'code': 123})
+        return json.dumps({'error': "Server error regex searching the database.", 'code': 123})
