@@ -1,9 +1,13 @@
 import io
+import boto3
+import re
+import time
 from flask import Blueprint, request, send_file, Response
 import api.AuthorizationAPI
 from services.DBConn import db
 from bson import Binary
 import json
+from boto3.s3.transfer import S3Transfer
 
 user_api = Blueprint('user_api', __name__)
 userDB = db.users
@@ -119,10 +123,10 @@ def getUserPicture():
             return Response(status=404)
         else:
             if 'profilePicture' in record and record['profilePicture'] is not None:
-                return send_file(io.BytesIO(record['profilePicture']), attachment_filename='ppic_' + username,
-                                 mimetype='image/png')
+                return "dkdno63yk5s4u.cloudfront.net/" + record['profilePicture']
+                #return send_file(io.BytesIO(record['profilePicture']), attachment_filename='ppic_' + username, mimetype='image/png')
             else:
-                return Response(status=404)
+                return ""
     except Exception as e:
         print(e)
         return json.dumps({'error': "Server error while fetching profile picture", 'code': 1})
@@ -132,11 +136,16 @@ def getUserPicture():
 @api.AuthorizationAPI.requires_auth
 def updateUserPicture():
     username = request.userNameFromToken
-    file = request.files['pic'].read()
+    file = request.files['pic']
+
     if not file:
         return json.dumps({'error': "No file uploaded with identifier 'pic'", 'code': 1})
-    print(len(file))
-    if len(file) > (1000000 * 5):
+
+    if not file.content_type.startswith("image/"):
+        return json.dumps({'error': "File is not an image.", 'code': 842})
+
+    length = 0
+    if length > (1000000 * 5):
         return json.dumps({'error': "File too large.", 'code': 3})
 
     try:
@@ -144,11 +153,17 @@ def updateUserPicture():
         if record is None:
             return json.dumps({'error': "No user found for username: " + username})
         else:
+            s3client = boto3.client('s3')
+            timeNow = str(round(time.time() * 1000))
+
+            key = username + "/" + timeNow + "/" + file.filename
+            s3client.upload_fileobj(file, 'barterplace', key, ExtraArgs={'ACL':'public-read', 'ContentType': file.content_type})
+
             result = userDB.update_one(
                 {"username": username},
                 {
                     "$set": {
-                        "profilePicture": Binary(file)
+                        "profilePicture": key
                     }
                 }
             )
