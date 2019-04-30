@@ -19,7 +19,7 @@ def getFavorite():      # returns list of object_ids under user
     username = request.userNameFromToken
 
     try:
-        user_favorites = dumps(listingDB.find({'username': username}))
+        user_favorites = dumps(userDB.find({'username': username}))
 
         if user_favorites is None:
             return json.dumps({'error': username + " does not exist in database", 'code': 1})
