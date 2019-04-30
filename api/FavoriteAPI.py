@@ -46,7 +46,7 @@ def setFavorite(object_id):
                 {'username': username},
                 {
                     "$push": {
-                        "favorites": object_id
+                        "favorites": ObjectId(object_id)
 
                     }
                 }
