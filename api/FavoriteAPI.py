@@ -42,7 +42,7 @@ def setFavorite(object_id):
         if user is None:
             return json.dumps({'error': username + " does not exist in database", 'code': 3})
         else:
-            listingDB.update_one(    # update the user document field with favorite list to store user favorites
+            userDB.update_one(    # update the user document field with favorite list to store user favorites
                 {'username': username},
                 {
                     "$addToSet": {
