@@ -17,14 +17,16 @@ listingDB = db.listings
 @api.AuthorizationAPI.requires_auth
 def getFavorite():      # returns list of object_ids under user
     username = request.userNameFromToken
-
+    
     try:
-        user_favorites = dumps(userDB.find({'username': username}))
+        user_favorites = userDB.find({'username': username})
 
         if user_favorites is None:
             return json.dumps({'error': username + " does not exist in database", 'code': 1})
         else:
-            return user_favorites['favorites']
+
+            for document in user_favorites:
+                return json.dumps(document['favorites'])
 
     except Exception as e:
         print(e)
@@ -46,7 +48,7 @@ def setFavorite(object_id):
                 {'username': username},
                 {
                     "$addToSet": {
-                        "favorites": ObjectId(object_id)
+                        "favorites": object_id
 
                     }
                 }
