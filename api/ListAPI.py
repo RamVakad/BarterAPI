@@ -101,7 +101,7 @@ def updateListing(object_id):
             return json.dumps({'error': "The listing you want to update does not exist.", 'code': 10})
         else:
             # update condition, and description
-            listingDB.updateOne(
+            listingDB.update_one(
                 {'_id': ObjectId(object_id)},
                 {
                     "$set": {
