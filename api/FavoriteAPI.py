@@ -45,7 +45,7 @@ def setFavorite(object_id):
             listingDB.update_one(    # update the user document field with favorite list to store user favorites
                 {'username': username},
                 {
-                    "$push": {
+                    "$set": {
                         "favorites": ObjectId(object_id)
 
                     }
