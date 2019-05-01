@@ -58,7 +58,7 @@ def addListing():
     file = request.files['picture']
 
     if not file:
-        return json.dumps({'error': "No file uploaded with identifier 'pic'", 'code': 1})
+        return json.dumps({'error': "No file uploaded with identifier 'pic'", 'code': 20})
 
     if not file.content_type.startswith("image/"):
         return json.dumps({'error': "File is not an image.", 'code': 842})
