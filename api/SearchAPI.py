@@ -3,6 +3,7 @@ from services.DBConn import db
 import api.AuthorizationAPI
 from bson.json_util import dumps
 import json
+import re
 
 search_api = Blueprint('search_api', __name__)
 userDB = db.users
@@ -14,9 +15,8 @@ listingDB = db.listings
 def searchListings():
     username = request.userNameFromToken
     query = request.args.get('query')  # /search?query=
-
     try:
-        listings = dumps(listingDB.find({'item': query}))
+        listings = dumps(listingDB.find({'item': {'$regex': query}}))
         if listings is None:
             return json.dumps({'error': "Searched item not found: "})
         else:
