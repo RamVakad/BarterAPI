@@ -59,7 +59,3 @@ def setFavorite(object_id):
     except Exception as e:
         print(e)
         return json.dumps({'error': "Server error saving current user's favorites.", 'code': 4})
-
-
-
-

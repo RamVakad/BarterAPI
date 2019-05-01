@@ -10,16 +10,19 @@ import datetime
 import boto3
 from boto3.s3.transfer import S3Transfer
 
+
 list_api = Blueprint('list_api', __name__)
 userDB = db.users
 listingDB = db.listings
 
 
-@list_api.route("", methods=['GET'])
+@list_api.route("/<int:offset>", methods=['GET'])
 @api.AuthorizationAPI.requires_auth
-def allListing():
+def allListing(offset):
     try:
-        listings = dumps(listingDB.find())
+
+        # paginate, 10 listings per call
+        listings = dumps(listingDB.find().limit(offset * 10))
         if listings is None:
             return json.dumps({'error': "No listings found.", 'code': 1})
         else:
