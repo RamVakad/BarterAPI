@@ -46,10 +46,9 @@ def userListing():
 
 
 @list_api.route("/add", methods=['POST'])
-# @api.AuthorizationAPI.requires_auth
+@api.AuthorizationAPI.requires_auth
 def addListing():
-    # username = request.userNameFromToken
-    username = "tom321@myhunter.cuny.edu"
+    username = request.userNameFromToken
     item = request.args.get('item')
     category = request.args.get('category')
     condition = request.args.get('condition')
