@@ -22,7 +22,7 @@ def allListing(offset):
     try:
 
         # paginate, 10 listings per call
-        listings = dumps(listingDB.find().limit(offset * 10))
+        listings = dumps(listingDB.find().skip((offset-1)*10).limit(10))
         if listings is None:
             return json.dumps({'error': "No listings found.", 'code': 1})
         else:
