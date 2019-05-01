@@ -17,7 +17,7 @@ listingDB = db.listings
 @api.AuthorizationAPI.requires_auth
 def getFavorite():      # returns list of object_ids under user
     username = request.userNameFromToken
-    
+
     try:
         user_favorites = userDB.find({'username': username})
 
@@ -59,3 +59,31 @@ def setFavorite(object_id):
     except Exception as e:
         print(e)
         return json.dumps({'error': "Server error saving current user's favorites.", 'code': 4})
+
+
+@favorite_api.route("/delete/<object_id>")
+@api.AuthorizationAPI.requires_auth
+def unFavorite(object_id):
+    username = request.userNameFromToken
+
+    try:
+        user = userDB.find({'username': username})
+
+        if user is None:
+            return json.dumps({'error': username + " does not exist in database", 'code': 5})
+        else:
+            userDB.update_one(
+                {'username': username},
+                {
+                    "$pull": {
+                        "favorites": object_id
+
+                    }
+                }
+            )
+
+            return json.dumps({'success': True})
+
+    except Exception as e:
+        print(e)
+        return json.dumps({'error': "Server error deleting current user's favorites.", 'code': 6})
