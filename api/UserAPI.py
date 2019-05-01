@@ -81,31 +81,28 @@ def getUserDetails(username):
 @user_api.route("/update", methods=['POST'])
 @api.AuthorizationAPI.requires_auth
 def updateUserDetails():
-    content = request.get_json()
-    username = request.userNameFromToken
-    # print(content)
+    name = request.args.get('name')
+    phone = request.args.get('phone')
 
-    if 'name' in content and isinstance(content['name'], str):
-        res = userDB.update_one(
-            {"username": username},
-            {
-                "$set": {
-                    "name": content['name'],
+    try:
+        record = userDB.find_one({'username': request.userNameFromToken})
+        if record is None:
+            return json.dumps({'error': "The listing you want to update does not exist.", 'code': 10})
+        else:
+            userDB.update_one(
+                {'username': request.userNameFromToken},
+                {
+                    "$set": {
+                        "name": name,
+                        "phone": phone
+                    }
                 }
-            }
-        )
+            )
 
-    if 'phone' in content and isinstance(content['phone'], str):
-        res = userDB.update_one(
-            {"username": username},
-            {
-                "$set": {
-                    "phone": content['phone'],
-                }
-            }
-        )
-
-    return json.dumps({'success': True})
+            return json.dumps({'success': True})
+    except Exception as e:
+        print(e)
+        return json.dumps({'error': "Server error while checking if listing exists.", 'code': 11})
 
 
 @user_api.route("/profilePicture", methods=['GET'])
