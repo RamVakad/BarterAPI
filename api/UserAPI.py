@@ -78,7 +78,7 @@ def getUserDetails(username):
         return json.dumps({'error': "Server error while checking if username already exists."})
 
 
-@user_api.route("", methods=['POST'])
+@user_api.route("/update", methods=['POST'])
 @api.AuthorizationAPI.requires_auth
 def updateUserDetails():
     content = request.get_json()

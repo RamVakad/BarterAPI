@@ -7,6 +7,7 @@ from bson.json_util import dumps
 from bson.objectid import ObjectId
 import time
 import datetime
+from boto3.s3.transfer import S3Transfer
 
 list_api = Blueprint('list_api', __name__)
 userDB = db.users
@@ -53,18 +54,32 @@ def addListing():
     description = request.args.get('description')
     timeNow = int(round(time.time() * 1000))
     dateAdded = datetime.datetime.now()
-    picture = request.files['picture'].read()
+    picture = request.files['picture']
+
+    if not picture:
+        return json.dumps({'error': "No file uploaded with identifier 'pic'", 'code': 1})
+
+    if not picture.content_type.startswith("image/"):
+        return json.dumps({'error': "File is not an image.", 'code': 842})
 
     if len(picture) > (1000000 * 5):
         return json.dumps({'error': "File too large.", 'code': 5})
-
-    listing = {'username': username, 'item': item, 'category': category, 'condition': condition, 'description': description, 'timeAdded': timeNow, 'dateAdded': dateAdded, 'picture': Binary(picture)}
 
     try:
         record = listingDB.find_one({'item': item, 'description': description})
         if record:
             return json.dumps({'error': "You are trying to add a duplicate listing.", 'code': 6})
         else:
+            s3client = boto3.client('s3')
+
+            key = username + "/" + timeNow + "/" + picture.filename
+            s3client.upload_fileobj(picture, 'barterplace', key,
+                                    ExtraArgs={'ACL': 'public-read', 'ContentType': picture.content_type})
+
+            listing = {'username': username, 'item': item, 'category': category, 'condition': condition,
+                       'description': description, 'timeAdded': timeNow, 'dateAdded': dateAdded,
+                       'picture': key}
+
             listingDB.insert_one(listing)
             return json.dumps({'success': True})
     except Exception as e:
