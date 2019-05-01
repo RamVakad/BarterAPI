@@ -32,13 +32,13 @@ def allListing(offset):
         return json.dumps({'error': "Server error grabbing all listings.", 'code': 2})
 
 
-@list_api.route("/user", methods=['GET'])
+@list_api.route("/user/<int:offset>", methods=['GET'])
 @api.AuthorizationAPI.requires_auth
-def userListing():
+def userListing(offset):
     username = request.userNameFromToken
 
     try:
-        listings = dumps(listingDB.find({'username': username}))
+        listings = dumps(listingDB.find({'username': username}).skip((offset-1)*10).limit(10))
         if listings is None:
             return json.dumps({'error': "No listings found for current user: " + username, 'code': 3})
         else:
