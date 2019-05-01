@@ -7,6 +7,7 @@ from bson.json_util import dumps
 from bson.objectid import ObjectId
 import time
 import datetime
+import boto3
 from boto3.s3.transfer import S3Transfer
 
 list_api = Blueprint('list_api', __name__)
@@ -45,25 +46,23 @@ def userListing():
 
 
 @list_api.route("/add", methods=['POST'])
-@api.AuthorizationAPI.requires_auth
+# @api.AuthorizationAPI.requires_auth
 def addListing():
-    username = request.userNameFromToken
+    # username = request.userNameFromToken
+    username = "tom321@myhunter.cuny.edu"
     item = request.args.get('item')
     category = request.args.get('category')
     condition = request.args.get('condition')
     description = request.args.get('description')
-    timeNow = int(round(time.time() * 1000))
+    timeNow = str(round(time.time() * 1000))
     dateAdded = datetime.datetime.now()
-    picture = request.files['picture']
+    file = request.files['picture']
 
-    if not picture:
+    if not file:
         return json.dumps({'error': "No file uploaded with identifier 'pic'", 'code': 1})
 
-    if not picture.content_type.startswith("image/"):
+    if not file.content_type.startswith("image/"):
         return json.dumps({'error': "File is not an image.", 'code': 842})
-
-    if len(picture) > (1000000 * 5):
-        return json.dumps({'error': "File too large.", 'code': 5})
 
     try:
         record = listingDB.find_one({'item': item, 'description': description})
@@ -72,16 +71,17 @@ def addListing():
         else:
             s3client = boto3.client('s3')
 
-            key = username + "/" + timeNow + "/" + picture.filename
-            s3client.upload_fileobj(picture, 'barterplace', key,
-                                    ExtraArgs={'ACL': 'public-read', 'ContentType': picture.content_type})
+            key = username + "/" + timeNow + "/" + file.filename
+            s3client.upload_fileobj(file, 'barterplace', key,
+                                    ExtraArgs={'ACL': 'public-read', 'ContentType': file.content_type})
 
             listing = {'username': username, 'item': item, 'category': category, 'condition': condition,
                        'description': description, 'timeAdded': timeNow, 'dateAdded': dateAdded,
                        'picture': key}
 
             listingDB.insert_one(listing)
-            return json.dumps({'success': True})
+
+        return json.dumps({'success': True})
     except Exception as e:
         print(e)
         return json.dumps({'error': "Server error while checking if listing exists.", 'code': 7})
