@@ -1,6 +1,7 @@
 import jwt
 import json
 import datetime
+import os
 from flask import Blueprint, request, Response
 from functools import wraps
 from services.DBConn import db
@@ -35,7 +36,9 @@ def login():
         return json.dumps({'error': "Server error while checking if user exists.", 'code': 3})
 
 
-SECRET_KEY = b'-\x1c\x9b\xa7x\xacH\nE{\x85=\xa6\x0e[\xe2\xe3\xb2\x01D\xc4\xd2x\x0f'
+
+SECRET_KEY = "Bad Localhost Encryption Key"
+if ('API_KEY' in os.environ): SECRET_KEY = os.environ['API_KEY'];
 
 
 # generates an encrypted auth token using the encrypted using the secret key valid for 24 hours
