@@ -5,6 +5,7 @@ from api.UserAPI import user_api
 from api.ListAPI import list_api
 from api.SearchAPI import search_api
 from api.FavoriteAPI import favorite_api
+from api.FilterAPI import filter_api
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -14,6 +15,7 @@ app.register_blueprint(auth_api, url_prefix='/auth')
 app.register_blueprint(list_api, url_prefix='/list')
 app.register_blueprint(search_api, url_prefix='/search')
 app.register_blueprint(favorite_api, url_prefix='/favorite')
+app.register_blueprint(filter_api, url_prefix='/filter')
 
 
 @app.route("/", methods=['GET'])
