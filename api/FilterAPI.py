@@ -10,15 +10,15 @@ userDB = db.users
 listingDB = db.listings
 
 
-@filter_api.route("", methods=['GET'])
+@filter_api.route("<int:offset>", methods=['GET'])
 @api.AuthorizationAPI.requires_auth
-def filterListings():
+def filterListings(offset):
     condition = request.args.get('condition')  # /filter?condition=
     category = request.args.get('category')  # /filter?condition=
 
     try:
         if (condition is not None) and not category :
-            listings = dumps(listingDB.find({'condition' : condition}))
+            listings = dumps(listingDB.find({'condition' : condition}).skip((offset-1)*10).limit(10))
         elif (category is not None) and not condition :
             listings = dumps(listingDB.find({'category':category }))
         elif(condition is not None) and (category is not None):
