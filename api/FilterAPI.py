@@ -20,9 +20,9 @@ def filterListings(offset):
         if (condition is not None) and not category :
             listings = dumps(listingDB.find({'condition' : condition}).skip((offset-1)*10).limit(10))
         elif (category is not None) and not condition :
-            listings = dumps(listingDB.find({'category':category }))
+            listings = dumps(listingDB.find({'category':category }).skip((offset-1)*10).limit(10))
         elif(condition is not None) and (category is not None):
-            listings = dumps(listingDB.find({'condition' : condition, 'category':category }))
+            listings = dumps(listingDB.find({'condition' : condition, 'category':category }).skip((offset-1)*10).limit(10))
 
         if listings is None:
             return json.dumps({'error': "Filterd item not found: "})
