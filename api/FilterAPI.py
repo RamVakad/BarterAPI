@@ -10,21 +10,34 @@ userDB = db.users
 listingDB = db.listings
 
 
-@filter_api.route("<int:offset>", methods=['GET'])
+@filter_api.route("/<currentpage>/<int:offset>", methods=['GET'])
 @api.AuthorizationAPI.requires_auth
-def filterListings(offset):
+def filterListings(currentpage, offset):
     condition = request.args.get('condition')  # /filter?condition=
     category = request.args.get('category')  # /filter?condition=
+    username = request.userNameFromToken
 
     try:
-        if not condition and not category:
-            listings = dumps(listingDB.find().skip((offset-1)*10).limit(10))
-        elif (condition is not None) and not category :
-            listings = dumps(listingDB.find({'condition' : condition}).skip((offset-1)*10).limit(10))
-        elif (category is not None) and not condition :
-            listings = dumps(listingDB.find({'category':category }).skip((offset-1)*10).limit(10))
-        elif(condition is not None) and (category is not None):
-            listings = dumps(listingDB.find({'condition' : condition, 'category':category }).skip((offset-1)*10).limit(10))
+        if(currentpage == "Items"):
+            if not condition and not category:
+                listings = dumps(listingDB.find().skip((offset-1)*10).limit(10))
+            elif (condition is not None) and not category :
+                listings = dumps(listingDB.find({'condition' : condition}).skip((offset-1)*10).limit(10))
+            elif (category is not None) and not condition :
+                listings = dumps(listingDB.find({'category':category }).skip((offset-1)*10).limit(10))
+            elif(condition is not None) and (category is not None):
+                listings = dumps(listingDB.find({'condition' : condition, 'category':category }).skip((offset-1)*10).limit(10))
+        
+        elif(currentpage == "List"):
+            if not condition and not category:
+                listings = dumps(listingDB.find({'username': username}).skip((offset-1)*10).limit(10))
+            elif (condition is not None) and not category :
+                listings = dumps(listingDB.find({'username': username, 'condition' : condition}).skip((offset-1)*10).limit(10))
+            elif (category is not None) and not condition :
+                listings = dumps(listingDB.find({'username': username, 'category':category }).skip((offset-1)*10).limit(10))
+            elif(condition is not None) and (category is not None):
+                listings = dumps(listingDB.find({'username': username, 'condition' : condition, 'category':category }).skip((offset-1)*10).limit(10))
+
 
         if listings is None:
             return json.dumps({'error': "Filterd item not found: "})
