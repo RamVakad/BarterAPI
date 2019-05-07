@@ -17,6 +17,9 @@ def filterListings(offset):
     category = request.args.get('category')  # /filter?condition=
 
     try:
+        if not condition or not category:
+            return json.dumps({'error': "empty condition or empty category"})
+
         if (condition is not None) and not category :
             listings = dumps(listingDB.find({'condition' : condition}).skip((offset-1)*10).limit(10))
         elif (category is not None) and not condition :
