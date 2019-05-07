@@ -19,7 +19,7 @@ def filterListings(currentpage, offset):
     user_favorites = userDB.find({'username': username})
 
     try:
-        if(currentpage == "Items"):
+        if(currentpage == "Items" or currentpage == "WishList"):
             if not condition and not category:
                 listings = dumps(listingDB.find().skip((offset-1)*10).limit(10))
             elif (condition is not None) and not category :
@@ -39,9 +39,9 @@ def filterListings(currentpage, offset):
             elif(condition is not None) and (category is not None):
                 listings = dumps(listingDB.find({'username': username, 'condition' : condition, 'category':category }).skip((offset-1)*10).limit(10))
 
-        elif(currentpage == "WishList"):
-            for document in user_favorites:
-                return json.dumps(document['favorites'])
+        # elif(currentpage == "WishList"):
+        #     for document in user_favorites:
+        #         return json.dumps(document['favorites'])
 
 
 
