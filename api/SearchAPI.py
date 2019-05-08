@@ -19,7 +19,7 @@ def searchListings():
         if listings is None:
             return json.dumps({'error': "Searched item not found: "})
         else:
-            return json.dump(listings)
+            return listings
     except Exception as e:
         print(e)
         return json.dumps({'error': "Server error regex searching the database.", 'code': 123})
