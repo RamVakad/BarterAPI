@@ -15,7 +15,7 @@ listingDB = db.listings
 def searchListings():
     query = request.args.get('query')  # /search?query=
     try:
-        listings = dumps(listingDB.find({'item': {'$regex': query}}))
+        listings = dumps(listingDB.find({'item': {'$regex': query, "$options": 'i'}}))
         if listings is None:
             return json.dumps({'error': "Searched item not found: "})
         else:
